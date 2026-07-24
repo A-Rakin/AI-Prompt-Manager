@@ -1,0 +1,25 @@
+# ==============================================================================
+# PromptForge - Python Dependencies
+# ==============================================================================
+# This file lists all the required Python packages for running PromptForge.
+#
+# Key Concepts Explained:
+# - Flask: A lightweight Web Server Gateway Interface (WSGI) web application framework.
+# - Flask-SQLAlchemy: An extension that integrates SQLAlchemy (an Object-Relational Mapper)
+#   with Flask to easily interact with relational databases using Python classes.
+# - Flask-Login: Manages user authentication sessions (logging in, logging out, remembering users).
+# - Flask-WTF: Integrates WTForms with Flask to handle form creation, rendering, and validation with built-in CSRF protection.
+# - Flask-Migrate: Handles database schema changes (migrations) using Alembic.
+# - Werkzeug: WSGI web application library used internally by Flask for security, request handling, and password hashing.
+# ==============================================================================
+
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.1
+Flask-Login>=0.6.3
+Flask-WTF>=1.2.1
+Flask-Migrate>=4.0.5
+email-validator>=2.1.0
+python-dotenv>=1.0.0
+WTForms>=3.1.2
+SQLAlchemy>=2.0.25
+Werkzeug>=3.0.1

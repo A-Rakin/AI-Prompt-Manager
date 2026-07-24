@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Favorites - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Favorite Prompts View (prompts/favorites.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="fas fa-heart text-danger me-2"></i> Favorite Prompts</h2>
+  <p class="text-secondary">Quick access to your star-marked prompts</p>
+</div>
+
+{% if prompts %}
+<div class="prompt-grid">
+  {% for prompt in prompts %}
+  <div class="prompt-card glass-card">
+    <div class="prompt-card-header">
+      <span class="platform-badge"><i class="fas fa-robot text-primary"></i> {{ prompt.platform }}</span>
+      <button class="btn-icon-action active-fav" onclick="toggleFavorite({{ prompt.id }}, this)" title="Unfavorite">
+        <i class="fas fa-heart text-danger"></i>
+      </button>
+    </div>
+
+    <a href="{{ url_for('prompts.detail', prompt_id=prompt.id) }}" class="prompt-title">
+      {{ prompt.title }}
+    </a>
+    <p class="prompt-description">{{ prompt.description or 'No description provided.' }}</p>
+
+    <div class="code-preview-box">{{ prompt.content }}</div>
+    <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+
+    <div class="prompt-card-footer">
+      <span class="small text-muted"><i class="far fa-copy me-1"></i> <span id="copy-count-{{ prompt.id }}">{{ prompt.copy_count }}</span> copies</span>
+      <button class="btn btn-sm btn-outline-primary" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+        <i class="far fa-copy me-1"></i> Copy
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon"><i class="fas fa-heart"></i></div>
+  <h4>No Favorites Marked Yet</h4>
+  <p class="text-secondary small mb-3">Click the heart icon on any prompt card to add it to your favorites section.</p>
+  <a href="{{ url_for('prompts.index') }}" class="btn btn-primary btn-sm">Explore Prompts Library</a>
+</div>
+{% endif %}
+{% endblock %}

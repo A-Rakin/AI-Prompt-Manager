@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Analytics Dashboard Template (analytics/index.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="fas fa-chart-line text-success me-2"></i> Productivity Analytics</h2>
+  <p class="text-secondary">Track prompt creation trends, platform usage, copy velocity, and category distribution</p>
+</div>
+
+<div id="analyticsChartsContainer">
+  <!-- Row 1: Monthly Creation Trend & Copy Velocity -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="glass-panel p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-chart-area text-success me-2"></i> Prompts Created (Last 6 Months)</h5>
+        <canvas id="chartMonthlyCreated" height="130"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="glass-panel p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-bolt text-warning me-2"></i> Weekly Copy Velocity</h5>
+        <canvas id="chartCopyVelocity" height="190"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Category Breakdown, Platform Distribution, Favorites Ratio -->
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="glass-panel p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-robot text-primary me-2"></i> Platform Distribution</h5>
+        <canvas id="chartPlatformUsage" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="glass-panel p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-folder text-warning me-2"></i> Category Breakdown</h5>
+        <canvas id="chartCategoryBreakdown" height="250"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="glass-panel p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-heart text-danger me-2"></i> Favorites Ratio</h5>
+        <canvas id="chartFavorites" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

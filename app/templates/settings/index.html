@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - User UI Theme & Preference Settings (settings/index.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="fas fa-sliders-h text-primary me-2"></i> Theme & Appearance Settings</h2>
+  <p class="text-secondary">Customize your dashboard aesthetic, accent colors, and UI layout preferences</p>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="glass-panel p-4 p-md-5">
+      <form method="POST" action="{{ url_for('settings.index') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <!-- Theme Mode Selection -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-semibold">Theme Mode</label>
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="form-check glass-card p-3 d-flex align-items-center gap-3">
+                <input class="form-check-input" type="radio" name="theme_preference" id="themeDark" value="dark" {{ 'checked' if current_user.theme_preference == 'dark' else '' }}>
+                <label class="form-check-label text-light fw-semibold cursor-pointer" for="themeDark">
+                  <i class="fas fa-moon text-primary me-2"></i> Dark Glass Mode (Default)
+                </label>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="form-check glass-card p-3 d-flex align-items-center gap-3">
+                <input class="form-check-input" type="radio" name="theme_preference" id="themeLight" value="light" {{ 'checked' if current_user.theme_preference == 'light' else '' }}>
+                <label class="form-check-label text-light fw-semibold cursor-pointer" for="themeLight">
+                  <i class="fas fa-sun text-warning me-2"></i> Light Mode
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accent Color Picker -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-semibold">Primary Accent Color</label>
+          <div class="d-flex align-items-center gap-3">
+            <input type="color" name="accent_color" value="{{ current_user.accent_color or '#6366F1' }}" class="form-control form-control-color" style="width: 60px; height: 42px;">
+            <span class="text-secondary small">Pick your favorite brand accent color for active buttons and glowing borders</span>
+          </div>
+        </div>
+
+        <!-- Font Size Choice -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-semibold">Font Size</label>
+          <select name="font_size" class="form-select">
+            <option value="small" {{ 'selected' if current_user.font_size == 'small' }}>Small (Compact Reading)</option>
+            <option value="medium" {{ 'selected' if current_user.font_size == 'medium' }}>Medium (Default)</option>
+            <option value="large" {{ 'selected' if current_user.font_size == 'large' }}>Large (High Visibility)</option>
+          </select>
+        </div>
+
+        <!-- Toggle Controls -->
+        <div class="mb-4">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="compact_mode" id="compactModeToggle" {{ 'checked' if current_user.compact_mode else '' }}>
+            <label class="form-check-label text-light fw-semibold" for="compactModeToggle">
+              Enable Compact Layout Mode (Reduces padding for power users)
+            </label>
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="animations_enabled" id="animationsToggle" {{ 'checked' if current_user.animations_enabled else '' }}>
+            <label class="form-check-label text-light fw-semibold" for="animationsToggle">
+              Enable Smooth AOS Scroll Animations
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save me-1"></i> Save Settings
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

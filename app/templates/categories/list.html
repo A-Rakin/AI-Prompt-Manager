@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Categories Management Template (categories/list.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="fas fa-folder text-warning me-2"></i> Categories</h2>
+  <p class="text-secondary">Organize prompts into high-level domains (Programming, Writing, Marketing, etc.)</p>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Category Creation Form -->
+  <div class="col-lg-4">
+    <div class="glass-panel p-4">
+      <h5 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-success"></i> Create Custom Category</h5>
+
+      <form method="POST" action="{{ url_for('categories.index') }}">
+        {{ form.csrf_token }}
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-semibold">Category Name *</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-semibold">Badge Accent Color</label>
+          {{ form.color }}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-semibold">Font Awesome Icon</label>
+          {{ form.icon }}
+          <div class="form-text text-muted">e.g. fa-code, fa-gavel, fa-chart-line</div>
+        </div>
+
+        {{ form.submit }}
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Category List & Statistics -->
+  <div class="col-lg-8">
+    <div class="glass-panel p-4">
+      <h5 class="fw-bold mb-3">Available Categories</h5>
+
+      <div class="row g-3">
+        {% for stat in category_stats %}
+        <div class="col-md-6">
+          <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon m-0" style="background-color: {{ stat.category.color }}22; color: {{ stat.category.color }}; width: 42px; height: 42px; font-size: 1.2rem;">
+                <i class="fas {{ stat.category.icon }}"></i>
+              </div>
+              <div>
+                <a href="{{ url_for('prompts.index', category=stat.category.id) }}" class="fw-semibold text-light text-decoration-none">
+                  {{ stat.category.name }}
+                </a>
+                <div class="small text-muted">
+                  {{ stat.prompt_count }} prompt{{ 's' if stat.prompt_count != 1 else '' }}
+                  {% if stat.category.is_system %}<span class="badge bg-secondary ms-1">System</span>{% endif %}
+                </div>
+              </div>
+            </div>
+
+            {% if not stat.category.is_system and stat.category.user_id == current_user.id %}
+            <form method="POST" action="{{ url_for('categories.delete', category_id=stat.category.id) }}" onsubmit="return confirm('Delete this custom category?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn-icon-action" title="Delete Category">
+                <i class="fas fa-trash text-danger"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Premium Dashboard Template (dashboard/index.html)
+  ==============================================================================
+  Features Notion/Linear layout, summary statistics, recent prompts grid,
+  recently copied prompts widget, activity timeline feed, and weekly copy count.
+  ==============================================================================
+-->
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="fw-bold mb-1">Welcome back, {{ current_user.username }} 👋</h2>
+    <p class="text-secondary mb-0">Here is your prompt library summary and activity overview</p>
+  </div>
+  <a href="{{ url_for('prompts.create') }}" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i> New Prompt
+  </a>
+</div>
+
+<!-- 4 Notion / Linear Metric Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary-subtle text-primary">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div class="stat-value">{{ total_prompts }}</div>
+      <div class="stat-label">Total Prompts</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="200">
+    <div class="stat-card">
+      <div class="stat-icon bg-danger-subtle text-danger">
+        <i class="fas fa-heart"></i>
+      </div>
+      <div class="stat-value">{{ favorite_count }}</div>
+      <div class="stat-label">Favorite Prompts</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="300">
+    <div class="stat-card">
+      <div class="stat-icon bg-warning-subtle text-warning">
+        <i class="fas fa-folder"></i>
+      </div>
+      <div class="stat-value">{{ categories_count }}</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="400">
+    <div class="stat-card">
+      <div class="stat-icon bg-success-subtle text-success">
+        <i class="fas fa-fire"></i>
+      </div>
+      <div class="stat-value" style="font-size: 1.4rem;">
+        <span class="badge" style="background-color: {{ most_used_category.color }};">
+          {{ most_used_category.name }}
+        </span>
+      </div>
+      <div class="stat-label">Top Category ({{ most_used_category.count }} prompts)</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Side: Recent Prompts & Recently Copied -->
+  <div class="col-lg-8">
+    <!-- Recent Prompts -->
+    <div class="glass-panel p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0"><i class="fas fa-clock text-primary me-2"></i> Recent Prompts</h5>
+        <a href="{{ url_for('prompts.index') }}" class="text-primary text-decoration-none small">View All <i class="fas fa-arrow-right ms-1"></i></a>
+      </div>
+
+      {% if recent_prompts %}
+      <div class="prompt-grid">
+        {% for prompt in recent_prompts %}
+        <div class="prompt-card glass-card">
+          <div class="prompt-card-header">
+            <span class="platform-badge">
+              <i class="fas fa-robot text-primary"></i> {{ prompt.platform }}
+            </span>
+            <div class="d-flex gap-1">
+              <button class="btn-icon-action {{ 'active-fav' if prompt.is_favorite }}" onclick="toggleFavorite({{ prompt.id }}, this)" title="Favorite">
+                <i class="{{ 'fas' if prompt.is_favorite else 'far' }} fa-heart"></i>
+              </button>
+            </div>
+          </div>
+
+          <a href="{{ url_for('prompts.detail', prompt_id=prompt.id) }}" class="prompt-title">
+            {{ prompt.title }}
+          </a>
+          <p class="prompt-description">{{ prompt.description or 'No description provided.' }}</p>
+
+          <div class="code-preview-box">{{ prompt.content }}</div>
+          <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+
+          <div class="prompt-card-footer">
+            <span class="small text-muted"><i class="far fa-copy me-1"></i> <span id="copy-count-{{ prompt.id }}">{{ prompt.copy_count }}</span> copies</span>
+            <button class="btn btn-sm btn-outline-primary" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+              <i class="far fa-copy me-1"></i> Copy
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-terminal"></i></div>
+        <h5>No Prompts Found</h5>
+        <p class="text-secondary small mb-3">Start by creating your first prompt for ChatGPT or Claude</p>
+        <a href="{{ url_for('prompts.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Create Prompt</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recently Copied Prompts -->
+    <div class="glass-panel p-4">
+      <h5 class="fw-bold mb-3"><i class="fas fa-clipboard-check text-success me-2"></i> Recently Copied</h5>
+      {% if recently_copied %}
+      <div class="list-group list-group-flush bg-transparent">
+        {% for prompt in recently_copied %}
+        <div class="list-group-item bg-transparent text-light border-secondary-subtle d-flex align-items-center justify-content-between py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="platform-badge"><i class="fas fa-robot text-primary"></i> {{ prompt.platform }}</span>
+            <div>
+              <a href="{{ url_for('prompts.detail', prompt_id=prompt.id) }}" class="fw-semibold text-light text-decoration-none">
+                {{ prompt.title }}
+              </a>
+              <div class="small text-muted">Copied {{ prompt.last_copied_at|relative_time }}</div>
+            </div>
+          </div>
+          <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+          <button class="btn btn-sm btn-outline-success" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+            <i class="far fa-copy me-1"></i> Copy Again
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-secondary small mb-0">No prompts copied recently. Click 'Copy' on any prompt card to track copy velocity!</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Side: Activity Timeline & Weekly Stats -->
+  <div class="col-lg-4">
+    <!-- Weekly Summary Badge -->
+    <div class="glass-panel p-4 mb-4 text-center">
+      <div class="stat-icon bg-info-subtle text-info mx-auto mb-2" style="width: 54px; height: 54px; font-size: 1.6rem;">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <h3 class="fw-bold mb-1">{{ weekly_copies }}</h3>
+      <p class="text-secondary small mb-0">Prompts copied this week</p>
+    </div>
+
+    <!-- Activity Timeline Feed -->
+    <div class="glass-panel p-4">
+      <h5 class="fw-bold mb-3"><i class="fas fa-history text-warning me-2"></i> Activity Timeline</h5>
+
+      {% if activity_timeline %}
+      <div class="timeline">
+        {% for log in activity_timeline %}
+        <div class="d-flex gap-3 mb-3 pb-3 border-bottom border-secondary-subtle">
+          <div class="mt-1">
+            {% if log.action == 'created' %}
+              <i class="fas fa-plus-circle text-success"></i>
+            {% elif log.action == 'copied' %}
+              <i class="fas fa-copy text-info"></i>
+            {% elif log.action == 'favorited' %}
+              <i class="fas fa-heart text-danger"></i>
+            {% elif log.action == 'edited' %}
+              <i class="fas fa-edit text-warning"></i>
+            {% else %}
+              <i class="fas fa-circle-notch text-primary"></i>
+            {% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="small text-light">{{ log.details }}</div>
+            <div class="small text-muted" style="font-size: 0.78rem;">{{ log.created_at|relative_time }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-secondary small mb-0">No recent activity recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

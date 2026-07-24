@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.name }} - Collection Folder{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Inside Collection Folder View (collections/detail.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <a href="{{ url_for('collections.index') }}" class="text-secondary text-decoration-none small">
+    <i class="fas fa-arrow-left me-1"></i> Back to Collections
+  </a>
+</div>
+
+<div class="glass-panel p-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="stat-icon m-0" style="background-color: {{ collection.color }}22; color: {{ collection.color }}; width: 54px; height: 54px; font-size: 1.5rem;">
+      <i class="fas {{ collection.icon }}"></i>
+    </div>
+    <div>
+      <h2 class="fw-bold mb-1">{{ collection.name }}</h2>
+      <p class="text-secondary mb-0">{{ collection.description or 'Folder Collection' }}</p>
+    </div>
+  </div>
+
+  <!-- Form to add prompts to this folder -->
+  <form method="POST" action="{{ url_for('collections.add_prompt', collection_id=collection.id) }}" class="d-flex gap-2">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <select name="prompt_id" class="form-select form-select-sm" style="min-width: 220px;" required>
+      <option value="">Select prompt to add...</option>
+      {% for pr in all_user_prompts %}
+        {% if pr not in prompts %}
+          <option value="{{ pr.id }}">{{ pr.title }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary text-nowrap"><i class="fas fa-plus me-1"></i> Add to Folder</button>
+  </form>
+</div>
+
+<!-- Prompts in Folder -->
+{% if prompts %}
+<div class="prompt-grid">
+  {% for prompt in prompts %}
+  <div class="prompt-card glass-card">
+    <div class="prompt-card-header">
+      <span class="platform-badge"><i class="fas fa-robot text-primary"></i> {{ prompt.platform }}</span>
+
+      <form method="POST" action="{{ url_for('collections.remove_prompt', collection_id=collection.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="prompt_id" value="{{ prompt.id }}"/>
+        <button type="submit" class="btn-icon-action" title="Remove from Collection">
+          <i class="fas fa-times text-danger"></i>
+        </button>
+      </form>
+    </div>
+
+    <a href="{{ url_for('prompts.detail', prompt_id=prompt.id) }}" class="prompt-title">
+      {{ prompt.title }}
+    </a>
+    <p class="prompt-description">{{ prompt.description or 'No description provided.' }}</p>
+
+    <div class="code-preview-box">{{ prompt.content }}</div>
+    <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+
+    <div class="prompt-card-footer">
+      <span class="small text-muted"><i class="far fa-copy me-1"></i> <span id="copy-count-{{ prompt.id }}">{{ prompt.copy_count }}</span> copies</span>
+      <button class="btn btn-sm btn-outline-primary" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+        <i class="far fa-copy me-1"></i> Copy
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+  <h4>This Folder is Empty</h4>
+  <p class="text-secondary small mb-0">Use the dropdown above or drag prompt cards onto the folder to add prompts.</p>
+</div>
+{% endif %}
+{% endblock %}

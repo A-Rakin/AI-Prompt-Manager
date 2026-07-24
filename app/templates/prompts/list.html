@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}All Prompts - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Prompts Listing Template (prompts/list.html)
+  ==============================================================================
+  Provides multi-criteria search filtering (by Category, Platform, Tag, Sort),
+  JSON/CSV Export, JSON Import Modal, and Card Grid.
+  ==============================================================================
+-->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+  <div>
+    <h2 class="fw-bold mb-1">Prompt Library</h2>
+    <p class="text-secondary mb-0">Manage, organize, and copy your AI prompts</p>
+  </div>
+
+  <div class="d-flex gap-2">
+    <!-- Export Dropdown -->
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="fas fa-download me-1"></i> Export
+      </button>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a class="dropdown-menu-item dropdown-item" href="{{ url_for('prompts.export_prompts', format='json') }}"><i class="fas fa-file-code me-2 text-warning"></i> Export JSON</a></li>
+        <li><a class="dropdown-menu-item dropdown-item" href="{{ url_for('prompts.export_prompts', format='csv') }}"><i class="fas fa-file-csv me-2 text-success"></i> Export CSV</a></li>
+      </ul>
+    </div>
+
+    <!-- Import Button triggering Modal -->
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal">
+      <i class="fas fa-upload me-1"></i> Import
+    </button>
+
+    <a href="{{ url_for('prompts.create') }}" class="btn btn-primary">
+      <i class="fas fa-plus me-1"></i> New Prompt
+    </a>
+  </div>
+</div>
+
+<!-- Filter Toolbar -->
+<div class="glass-panel p-3 mb-4">
+  <form method="GET" action="{{ url_for('prompts.index') }}" class="row g-2 align-items-center">
+    <!-- Search Field -->
+    <div class="col-md-3">
+      <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-sm" placeholder="Filter title or content...">
+    </div>
+
+    <!-- Category Filter -->
+    <div class="col-md-2">
+      <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {{ 'selected' if selected_category == cat.id }}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Platform Filter -->
+    <div class="col-md-2">
+      <select name="platform" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All AI Platforms</option>
+        <option value="ChatGPT" {{ 'selected' if selected_platform == 'ChatGPT' }}>ChatGPT</option>
+        <option value="Claude" {{ 'selected' if selected_platform == 'Claude' }}>Claude</option>
+        <option value="Gemini" {{ 'selected' if selected_platform == 'Gemini' }}>Gemini</option>
+        <option value="Copilot" {{ 'selected' if selected_platform == 'Copilot' }}>Copilot</option>
+        <option value="Grok" {{ 'selected' if selected_platform == 'Grok' }}>Grok</option>
+        <option value="Midjourney" {{ 'selected' if selected_platform == 'Midjourney' }}>Midjourney</option>
+        <option value="Stable Diffusion" {{ 'selected' if selected_platform == 'Stable Diffusion' }}>Stable Diffusion</option>
+      </select>
+    </div>
+
+    <!-- Sort Order Filter -->
+    <div class="col-md-3">
+      <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="created_desc" {{ 'selected' if sort_by == 'created_desc' }}>Sort: Newest First</option>
+        <option value="created_asc" {{ 'selected' if sort_by == 'created_asc' }}>Sort: Oldest First</option>
+        <option value="copies_desc" {{ 'selected' if sort_by == 'copies_desc' }}>Sort: Most Copied</option>
+        <option value="title_asc" {{ 'selected' if sort_by == 'title_asc' }}>Sort: Title A-Z</option>
+      </select>
+    </div>
+
+    <!-- Clear Filters Button -->
+    <div class="col-md-2 text-end">
+      <a href="{{ url_for('prompts.index') }}" class="btn btn-sm btn-outline-secondary w-100">
+        <i class="fas fa-undo me-1"></i> Reset
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- Prompt Cards Grid -->
+{% if prompts %}
+<div class="prompt-grid mb-4">
+  {% for prompt in prompts %}
+  <div class="prompt-card-wrapper" 
+       data-title="{{ prompt.title|lower }}"
+       data-content="{{ prompt.content|lower }}"
+       data-platform="{{ prompt.platform|lower }}"
+       data-tags="{% for t in prompt.tags %}{{ t.name|lower }} {% endfor %}"
+       draggable="true"
+       data-prompt-id="{{ prompt.id }}">
+    
+    <div class="prompt-card glass-card">
+      <div class="prompt-card-header">
+        <div class="d-flex align-items-center gap-2">
+          <span class="platform-badge">
+            <i class="fas fa-robot text-primary"></i> {{ prompt.platform }}
+          </span>
+          {% if prompt.is_pinned %}
+            <span class="badge bg-warning text-dark"><i class="fas fa-thumbtack me-1"></i> Pinned</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex gap-1">
+          <button class="btn-icon-action {{ 'active-pin' if prompt.is_pinned }}" onclick="togglePin({{ prompt.id }}, this)" title="Pin Prompt">
+            <i class="fas fa-thumbtack"></i>
+          </button>
+          <button class="btn-icon-action {{ 'active-fav' if prompt.is_favorite }}" onclick="toggleFavorite({{ prompt.id }}, this)" title="Favorite">
+            <i class="{{ 'fas' if prompt.is_favorite else 'far' }} fa-heart"></i>
+          </button>
+        </div>
+      </div>
+
+      <a href="{{ url_for('prompts.detail', prompt_id=prompt.id) }}" class="prompt-title">
+        {{ prompt.title }}
+      </a>
+      <p class="prompt-description">{{ prompt.description or 'No description available.' }}</p>
+
+      <div class="code-preview-box">{{ prompt.content }}</div>
+      <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+
+      <!-- Tag Badges -->
+      <div class="mb-3">
+        {% for tag in prompt.tags %}
+          <a href="{{ url_for('prompts.index', tag=tag.name) }}" class="tag-badge">#{{ tag.name }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="prompt-card-footer">
+        <span class="small text-muted"><i class="far fa-copy me-1"></i> <span id="copy-count-{{ prompt.id }}">{{ prompt.copy_count }}</span> copies</span>
+        <button class="btn btn-sm btn-outline-primary" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+          <i class="far fa-copy me-1"></i> Copy Prompt
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination Controls -->
+{% if pagination and pagination.pages > 1 %}
+<nav class="d-flex justify-content-center mt-4">
+  <ul class="pagination pagination-dark">
+    {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="{{ url_for('prompts.index', page=pagination.prev_num, q=search_query, category=selected_category, platform=selected_platform, sort=sort_by) }}">Previous</a></li>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages() %}
+      {% if page_num %}
+        <li class="page-item {{ 'active' if page_num == pagination.page }}">
+          <a class="page-link {{ 'bg-primary border-primary' if page_num == pagination.page else 'bg-dark text-light border-secondary' }}" href="{{ url_for('prompts.index', page=page_num, q=search_query, category=selected_category, platform=selected_platform, sort=sort_by) }}">{{ page_num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="{{ url_for('prompts.index', page=pagination.next_num, q=search_query, category=selected_category, platform=selected_platform, sort=sort_by) }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon"><i class="fas fa-search"></i></div>
+  <h4>No Prompts Found</h4>
+  <p class="text-secondary small mb-3">No prompts match your filter criteria or search query.</p>
+  <a href="{{ url_for('prompts.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Create New Prompt</a>
+</div>
+{% endif %}
+
+<!-- JSON Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title"><i class="fas fa-upload me-2 text-primary"></i> Import Prompts from JSON</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('prompts.import_prompts') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="modal-body">
+          <p class="text-secondary small">Upload a JSON file containing exported PromptForge prompts.</p>
+          <input type="file" name="file" class="form-control" accept=".json" required>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-upload me-1"></i> Start Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

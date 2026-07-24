@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Collections - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Collections Folders (collections/list.html)
+  ==============================================================================
+  Renders collection folders with HTML5 Drag-and-Drop dropzones.
+  ==============================================================================
+-->
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="fas fa-folder-open text-primary me-2"></i> Collections Folders</h2>
+  <p class="text-secondary">Group prompts into custom folders (Work, University, Research, Personal). Drag and drop prompts onto folder cards to organize!</p>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: New Collection Form -->
+  <div class="col-lg-4">
+    <div class="glass-panel p-4">
+      <h5 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-success"></i> Create Collection Folder</h5>
+
+      <form method="POST" action="{{ url_for('collections.index') }}">
+        {{ form.csrf_token }}
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-semibold">Collection Name *</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-semibold">Description</label>
+          {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-semibold">Folder Color</label>
+          {{ form.color }}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-semibold">Font Awesome Icon</label>
+          {{ form.icon }}
+        </div>
+
+        {{ form.submit }}
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Collections Grid with Dropzones -->
+  <div class="col-lg-8">
+    <div class="row g-3">
+      {% for col in collections %}
+      <div class="col-md-6">
+        <div class="glass-card p-4 collection-dropzone position-relative" data-collection-id="{{ col.id }}">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="stat-icon m-0" style="background-color: {{ col.color }}22; color: {{ col.color }}; width: 48px; height: 48px; font-size: 1.3rem;">
+              <i class="fas {{ col.icon }}"></i>
+            </div>
+
+            <form method="POST" action="{{ url_for('collections.delete', collection_id=col.id) }}" onsubmit="return confirm('Delete this collection folder? Prompts inside will be preserved.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn-icon-action" title="Delete Folder">
+                <i class="fas fa-trash text-danger"></i>
+              </button>
+            </form>
+          </div>
+
+          <a href="{{ url_for('collections.detail', collection_id=col.id) }}" class="h5 fw-bold text-light text-decoration-none d-block mb-1">
+            {{ col.name }}
+          </a>
+          <p class="text-secondary small mb-3">{{ col.description or 'No folder description.' }}</p>
+
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top border-secondary-subtle">
+            <span class="small text-muted"><i class="fas fa-layer-group me-1"></i> {{ col.prompts|selectattr('status', 'equalto', 'active')|list|length }} Prompts</span>
+            <a href="{{ url_for('collections.detail', collection_id=col.id) }}" class="btn btn-sm btn-outline-primary">
+              View Folder <i class="fas fa-chevron-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+          <h4>No Collection Folders Created</h4>
+          <p class="text-secondary small mb-0">Use the form on the left to create folders like Work, University, or Research.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

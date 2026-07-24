@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Prompt Creation & Editing Form (prompts/form.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <a href="{{ url_for('prompts.index') }}" class="text-secondary text-decoration-none small">
+    <i class="fas fa-arrow-left me-1"></i> Back to Prompts
+  </a>
+  <h2 class="fw-bold mt-2">{{ title }}</h2>
+</div>
+
+<div class="glass-panel p-4 p-md-5">
+  <form method="POST">
+    {{ form.csrf_token }}
+
+    <div class="mb-3">
+      <label class="form-label text-secondary small fw-semibold">Prompt Title *</label>
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div class="text-danger small mt-1">{{ form.title.errors[0] }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label text-secondary small fw-semibold">Short Description</label>
+      {{ form.description }}
+      {% if form.description.errors %}
+        <div class="text-danger small mt-1">{{ form.description.errors[0] }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label text-secondary small fw-semibold">Prompt Content / Instructions *</label>
+      {{ form.content }}
+      {% if form.content.errors %}
+        <div class="text-danger small mt-1">{{ form.content.errors[0] }}</div>
+      {% endif %}
+      <div class="form-text text-muted">Include system instructions, variable placeholders (e.g. [Insert Code Here]), and formatting rules.</div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label class="form-label text-secondary small fw-semibold">Target AI Platform</label>
+        {{ form.platform }}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label text-secondary small fw-semibold">Category</label>
+        {{ form.category_id }}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label text-secondary small fw-semibold">Complexity Level</label>
+        {{ form.difficulty }}
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <label class="form-label text-secondary small fw-semibold">Tags (Comma Separated)</label>
+        {{ form.tags_input }}
+        <div class="form-text text-muted">e.g. python, refactoring, code-review</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label text-secondary small fw-semibold">Language</label>
+        {{ form.language }}
+      </div>
+    </div>
+
+    <div class="d-flex gap-4 mb-4">
+      <div class="form-check">
+        {{ form.is_pinned(class="form-check-input") }}
+        <label class="form-check-label text-light" for="is_pinned">
+          <i class="fas fa-thumbtack text-warning me-1"></i> Pin prompt to top of lists
+        </label>
+      </div>
+
+      <div class="form-check">
+        {{ form.is_favorite(class="form-check-input") }}
+        <label class="form-check-label text-light" for="is_favorite">
+          <i class="fas fa-heart text-danger me-1"></i> Mark as favorite
+        </label>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      {{ form.submit }}
+      <a href="{{ url_for('prompts.index') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

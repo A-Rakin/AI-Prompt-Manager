@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ prompt.title }} - PromptForge{% endblock %}
+
+{% block content %}
+<!--
+  ==============================================================================
+  PromptForge - Single Prompt Detail View (prompts/detail.html)
+  ==============================================================================
+-->
+<div class="mb-4">
+  <a href="{{ url_for('prompts.index') }}" class="text-secondary text-decoration-none small">
+    <i class="fas fa-arrow-left me-1"></i> Back to Prompts Library
+  </a>
+</div>
+
+<div class="glass-panel p-4 p-md-5 mb-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="platform-badge"><i class="fas fa-robot text-primary"></i> {{ prompt.platform }}</span>
+        {% if prompt.category %}
+          <span class="badge" style="background-color: {{ prompt.category.color }};">{{ prompt.category.name }}</span>
+        {% endif %}
+        <span class="badge bg-secondary">{{ prompt.difficulty }}</span>
+        <span class="badge bg-dark border border-secondary">{{ prompt.language }}</span>
+      </div>
+      <h2 class="fw-bold mb-1">{{ prompt.title }}</h2>
+      <p class="text-secondary mb-0">{{ prompt.description or 'No description provided.' }}</p>
+    </div>
+
+    <!-- Action Button Bar -->
+    <div class="d-flex flex-wrap gap-2">
+      <div id="prompt-content-{{ prompt.id }}" class="d-none">{{ prompt.content }}</div>
+      <button class="btn btn-primary" onclick="copyPromptToClipboard({{ prompt.id }}, this)">
+        <i class="far fa-copy me-1"></i> Copy Prompt
+      </button>
+
+      <form method="POST" action="{{ url_for('prompts.duplicate', prompt_id=prompt.id) }}" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn btn-outline-secondary" title="Duplicate Prompt">
+          <i class="fas fa-clone me-1"></i> Duplicate
+        </button>
+      </form>
+
+      <a href="{{ url_for('prompts.edit', prompt_id=prompt.id) }}" class="btn btn-outline-warning">
+        <i class="fas fa-edit me-1"></i> Edit
+      </a>
+
+      <form method="POST" action="{{ url_for('prompts.archive_prompt', prompt_id=prompt.id) }}" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn btn-outline-info">
+          <i class="fas fa-archive me-1"></i> {{ 'Restore' if prompt.status == 'archived' else 'Archive' }}
+        </button>
+      </form>
+
+      <form method="POST" action="{{ url_for('prompts.hard_delete', prompt_id=prompt.id) }}" class="d-inline" onsubmit="return confirm('Permanently delete this prompt?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="fas fa-trash me-1"></i> Delete
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Full Prompt Content Box -->
+  <div class="position-relative mb-4">
+    <label class="form-label text-secondary small fw-semibold">Prompt Content</label>
+    <div class="p-4 bg-dark rounded border border-secondary font-monospace" style="white-space: pre-wrap; font-size: 0.95rem; color: #E2E8F0; line-height: 1.7;">{{ prompt.content }}</div>
+  </div>
+
+  <!-- Tags & Meta Info -->
+  <div class="row pt-3 border-top border-secondary-subtle">
+    <div class="col-md-6 mb-3 mb-md-0">
+      <label class="form-label text-secondary small fw-semibold d-block">Tags</label>
+      {% if prompt.tags %}
+        {% for tag in prompt.tags %}
+          <a href="{{ url_for('prompts.index', tag=tag.name) }}" class="tag-badge fs-6 me-1">#{{ tag.name }}</a>
+        {% endfor %}
+      {% else %}
+        <span class="text-muted small">No tags added.</span>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6 text-md-end">
+      <div class="small text-secondary">
+        <div><i class="far fa-copy me-1"></i> Total Copy Count: <strong class="text-light" id="copy-count-{{ prompt.id }}">{{ prompt.copy_count }}</strong></div>
+        <div><i class="far fa-clock me-1"></i> Last Copied: <strong class="text-light">{{ prompt.last_copied_at|relative_time if prompt.last_copied_at else 'Never' }}</strong></div>
+        <div><i class="far fa-calendar-alt me-1"></i> Created: {{ prompt.created_at.strftime('%b %d, %Y') }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
