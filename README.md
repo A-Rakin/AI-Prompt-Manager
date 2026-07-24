@@ -81,5 +81,8 @@ Open your browser and navigate to `http://127.0.0.1:5000/`.
 
 
 <img width="1365" height="646" alt="image" src="https://github.com/user-attachments/assets/3e559e42-cf46-4f88-92f6-1aaf849cfaec" />
+<img width="1360" height="640" alt="image" src="https://github.com/user-attachments/assets/9f517a77-16e0-4675-8524-142877fc5355" />
+<img width="1349" height="643" alt="image" src="https://github.com/user-attachments/assets/6d513895-8fc2-41e7-9bc7-118626be5696" />
+<img width="1365" height="691" alt="image" src="https://github.com/user-attachments/assets/db74d93f-bc2b-4235-8cd2-8f1757defc9d" />
 
 
