@@ -78,3 +78,8 @@ Open your browser and navigate to `http://127.0.0.1:5000/`.
 | `/api/v1/prompts/<id>/copy` | `POST` | Increment copy counter and record copy event |
 | `/api/v1/tags` | `GET` | List user's tags for search autocompletion |
 | `/api/v1/stats` | `GET` | Summary statistics of active/favorite/archived prompts |
+
+
+<img width="1365" height="646" alt="image" src="https://github.com/user-attachments/assets/3e559e42-cf46-4f88-92f6-1aaf849cfaec" />
+
+
